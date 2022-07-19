@@ -1,112 +1,113 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
-import type {Node} from 'react';
+import React, { Component } from "react";
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  Platform,
   StyleSheet,
   Text,
-  useColorScheme,
   View,
-} from 'react-native';
+  PermissionsAndroid,
+  BackHandler,
+  NativeModules,
+  Alert,
+} from "react-native";
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import { DocumentView, RNPdftron } from "@pdftron/react-native-pdf";
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+export default class App extends Component {
+  // If you are using TypeScript, use `constructor(props: Props) {`
+  // Otherwise, use:
+  constructor(props) {
+    super(props);
 
-const App: () => Node = () => {
-  const isDarkMode = useColorScheme() === 'dark';
+    // Uses the platform to determine if storage permisions have been automatically granted.
+    // The result of this check is placed in the component's state.
+    // this.state = {
+    //   permissionGranted: Platform.OS === 'ios' ? true : false
+    // };
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    RNPdftron.initialize("Insert commercial license key here after purchase");
+    RNPdftron.enableJavaScript(true);
+  }
+
+  // Uses the platform to determine if storage permissions need to be requested.
+  // componentDidMount() {
+  //   if (Platform.OS === 'android') {
+  //     this.requestStoragePermission();
+  //   }
+  // }
+
+  // Requests storage permissions for Android and updates the component's state using
+  // the result.
+  // async requestStoragePermission() {
+  //   try {
+  //     const granted = await PermissionsAndroid.request(
+  //       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+  //     );
+  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //       this.setState({
+  //         permissionGranted: true
+  //       });
+  //       console.log("Storage permission granted");
+  //     } else {
+  //       this.setState({
+  //         permissionGranted: false
+  //       });
+  //       console.log("Storage permission denied");
+  //     }
+  //   } catch (err) {
+  //     console.warn(err);
+  //   }
+  // }
+
+  onLeadingNavButtonPressed = () => {
+    console.log("leading nav button pressed");
+    if (Platform.OS === "ios") {
+      Alert.alert(
+        "App",
+        "onLeadingNavButtonPressed",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+        { cancelable: true }
+      );
+    } else {
+      BackHandler.exitApp();
+    }
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.js</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-};
+  render() {
+    // If the component's state indicates that storage permissions have not been granted,
+    // a view is loaded prompting users to grant these permissions.
+    // if (!this.state.permissionGranted) {
+    //   return (
+    //     <View style={styles.container}>
+    //       <Text>
+    //         Storage permission required.
+    //       </Text>
+    //     </View>
+    //   )
+    // }
+
+    const path =
+      "https://pdftron.s3.amazonaws.com/downloads/pl/PDFTRON_mobile_about.pdf";
+
+    return (
+      <DocumentView
+        document={path}
+        showLeadingNavButton={true}
+        leadingNavButtonIcon={
+          Platform.OS === "ios"
+            ? "ic_close_black_24px.png"
+            : "ic_arrow_back_white_24dp"
+        }
+        onLeadingNavButtonPressed={this.onLeadingNavButtonPressed}
+      />
+    );
+  }
+}
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F5FCFF",
   },
 });
-
-export default App;
